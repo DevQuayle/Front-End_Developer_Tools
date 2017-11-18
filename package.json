@@ -1,0 +1,25 @@
+{
+  "name": "frontend_worklfow",
+  "version": "1.0.0",
+  "description": "Frontend Tools",
+  "main": "fuse,js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sławek Król <DevQuayle>",
+  "license": "MIT",
+  "dependencies": {
+    "browser-sync": "^2.18.13",
+    "fuse-box": "^2.5.0-beta.1",
+    "fuse-test-runner": "^1.0.16",
+    "moment": "^2.19.2",
+    "node-sass": "^4.6.1",
+    "nunjucks": "^3.0.1",
+    "typescript": "^2.6.1",
+    "uglify-js": "^3.1.9"
+  },
+  "devDependencies": {
+    "consolidate": "^0.15.0",
+    "twig": "^1.10.5"
+  }
+}

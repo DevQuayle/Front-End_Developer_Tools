@@ -1,17 +1,35 @@
-const {FuseBox, CSSPlugin, SassPlugin, WebIndexPlugin, BannerPlugin ,UglifyJSPlugin, Sparky} = require("fuse-box");
+const {FuseBox, CSSPlugin, SassPlugin, WebIndexPlugin, BannerPlugin, UglifyJSPlugin, Sparky} = require("fuse-box");
 const templateRender = require('nunjucks');
 const bs = require("browser-sync");
 const chalk = require('chalk');
 const log = console.log;
+var net = require('net');
 
 const error = chalk.bold.white.bgRed;
 const warning = chalk.bold.white.bgYellow;
 const info = chalk.bold.white.bgBlue;
-var fp = require("find-free-port")
-  var PORT = 3003;// console.log(freePort);
+var portrange = 3000
+var PORT = 3000;
 
-fp(3005, function(err, freePort){
-    PORT = freePort
+
+function getPort(cb) {
+    var port = portrange
+    portrange += 1
+
+    var server = net.createServer()
+    server.listen(port, function (err) {
+        server.once('close', function () {
+            cb(port)
+        })
+        server.close()
+    })
+    server.on('error', function (err) {
+        getPort(cb)
+    })
+}
+
+getPort((port) => {
+    PORT = port;
 });
 
 let fuse, app, vendor, isProduction = false;
@@ -44,23 +62,21 @@ Sparky.task("config", () => {
         .instructions(`!> [index.ts]`);
 
     bs.init({
-        server: "./dist/"
-    }, (er,bs) => {
+        server: "./dist/",
+        port: PORT + 1,
+    }, (er, bs) => {
 
     });
     if (!isProduction) {
         // console.log(bs.options.get('port'));
         fuse.dev({
-            httpServer: false,
+            httpServer: true,
             port: PORT
         });
 
     }
 
 });
-
-
-
 
 
 // development task "node fuse""
@@ -86,9 +102,9 @@ Sparky.task('render', () => {
     return Sparky.src("**/*.+(html|twig|json)", {base: './src'})
         .file('*.*', file => {
             templateRender.configure('./src/');
-            templateRender.render(file.homePath,  (err, res) =>{
-               if(err) log(error(err));
-               if(res) file.setContent(res);
+            templateRender.render(file.homePath, (err, res) => {
+                if (err) log(error(err));
+                if (res) file.setContent(res);
             });
             file.extension = 'html';
         })

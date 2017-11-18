@@ -1,5 +1,5 @@
 $font-stack: Helvetica, sans-serif;
-$primary-color: #333;
+$primary-color: red;
 
 body {
     font: 100% $font-stack;
@@ -13,6 +13,24 @@ body {
     margin: 0;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     background: #ececec;
+    h1{
+        text-align: center;
+        color: #000;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: center;
+        text-decoration: underline;
+        position: relative;
+        &:before{
+            content:'';
+            position: absolute;
+            top: 0;
+            height: 3px;
+            left: 0;
+            right: 0;
+            background-color: $primary-color;
+        }
+    }
 }
 
 .content * {
@@ -29,5 +47,5 @@ body {
 
 }
 body{
-    background: pink;
+    background-color: pink;
 }

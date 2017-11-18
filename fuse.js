@@ -1,6 +1,12 @@
-const {FuseBox, CSSPlugin, SassPlugin, WebIndexPlugin, UglifyJSPlugin, Sparky} = require("fuse-box");
+const {FuseBox, CSSPlugin, SassPlugin, WebIndexPlugin, BannerPlugin ,UglifyJSPlugin, Sparky} = require("fuse-box");
 const templateRender = require('nunjucks');
 const bs = require("browser-sync");
+const chalk = require('chalk');
+const log = console.log;
+
+const error = chalk.bold.white.bgRed;
+const warning = chalk.bold.white.bgYellow;
+const info = chalk.bold.white.bgBlue;
 
 let fuse, app, vendor, isProduction = false;
 
@@ -16,6 +22,7 @@ Sparky.task("config", () => {
         plugins: [
             [SassPlugin(), CSSPlugin()],
             CSSPlugin(),
+            BannerPlugin('// Hey this is my Front launcher! Copyright 2017!'),
             // WebIndexPlugin(),
             isProduction && UglifyJSPlugin()
         ]
@@ -30,29 +37,25 @@ Sparky.task("config", () => {
         .instructions(`!> [index.ts]`);
 
     bs.init({
-        server: "./dist/tpl/"
-    });
-
-    if (!isProduction) {
-        fuse.dev({
-            httpServer:false,
-            // root: 'dist',
-            // open: false, // Boolean (false is default) | String: open specifc url like 'http://dev-server:8080'
-            port: 3005
-        });
-    }
-});
-
-
-// Inicializacja browserSynca
-Sparky.task('browserSyncInit', () => {
-    bs.init({
         server: "./dist/"
+    }, (er,bs) => {
+        if (!isProduction) {
+            fuse.dev({
+                httpServer: false,
+                port: bs.options.get('port')
+            });
+        }
     });
+
+
 });
+
+
+
+
 
 // development task "node fuse""
-Sparky.task("default", ["browserSyncInit","config", "renderTremplate", 'reload'], () => {
+Sparky.task("default", ["config", "renderTremplate"], () => {
     vendor.hmr().watch();
     app.watch();
     return fuse.run();
@@ -69,31 +72,35 @@ Sparky.task("set-production", () => {
     return Sparky.src("dist/").clean("dist/");
 });
 
-// przeładowuje stronę po wygenerowaniu html
-Sparky.task('reload', () => {
-    return Sparky.watch("**/*.html", {base: './dist'})
+
+Sparky.task('render', () => {
+    return Sparky.src("**/*.+(html|twig|json)", {base: './src'})
         .file('*.*', file => {
-            bs.reload();
+            templateRender.configure('./src/');
+            templateRender.render(file.homePath,  (err, res) =>{
+               if(err) log(error(err));
+               if(res) file.setContent(res);
+            });
+            file.extension = 'html';
         })
+        .dest("./dist")
+        .completed(() => {
+            bs.reload();
+        });
 });
 
 //budowanie szablony HTML
 Sparky.task("renderTremplate", () => {
     return Sparky.watch("**/*.+(html|twig|json)", {base: "./src"})
-        .file('*.twig', file => {
-            //TODO excludować nie potrzebne katalogi
-            templateRender.configure('./src/tpl/');
-            if(file.name === 'app.twig'){
-               file.setContent(templateRender.render(file.name));
-               file.extension = 'html';
-            }
-        })
-        .dest("./dist");
-});
+        .completed(() => {
+            Sparky.start('render');
+        });
 
+});
 
 
 //TODO
 // -obrazki
 // -czcionki
 // -dorobic global config
+// -dynamiczny port

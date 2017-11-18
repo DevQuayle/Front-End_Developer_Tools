@@ -8,13 +8,13 @@ var net = require('net');
 const error = chalk.bold.white.bgRed;
 const warning = chalk.bold.white.bgYellow;
 const info = chalk.bold.white.bgBlue;
-var portrange = 3000
+
 var PORT = 3000;
 
 
-function getPort(cb) {
-    var port = portrange
-    portrange += 1
+function getPort(from, cb) {
+    var port = from
+    from += 1
 
     var server = net.createServer()
     server.listen(port, function (err) {
@@ -24,11 +24,11 @@ function getPort(cb) {
         server.close()
     })
     server.on('error', function (err) {
-        getPort(cb)
+        getPort(from,cb)
     })
 }
 
-getPort((port) => {
+getPort(3000,(port) => {
     PORT = port;
 });
 
@@ -65,12 +65,13 @@ Sparky.task("config", () => {
         server: "./dist/",
         port: PORT + 1,
     }, (er, bs) => {
-
+        // console.log(bs.ui.options.get('port'));
+        getPort(bs.ui.options.get('port'),(port)=>{ console.log('')});
     });
     if (!isProduction) {
         // console.log(bs.options.get('port'));
         fuse.dev({
-            httpServer: true,
+            httpServer: false,
             port: PORT
         });
 

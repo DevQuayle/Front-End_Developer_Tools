@@ -29,10 +29,15 @@ Sparky.task("config", () => {
     app = fuse.bundle("app")
         .instructions(`!> [index.ts]`);
 
+    bs.init({
+        server: "./dist/tpl/"
+    });
+
     if (!isProduction) {
         fuse.dev({
-            root: 'dist',
-            open: false, // Boolean (false is default) | String: open specifc url like 'http://dev-server:8080'
+            httpServer:false,
+            // root: 'dist',
+            // open: false, // Boolean (false is default) | String: open specifc url like 'http://dev-server:8080'
             port: 3005
         });
     }
@@ -42,12 +47,12 @@ Sparky.task("config", () => {
 // Inicializacja browserSynca
 Sparky.task('browserSyncInit', () => {
     bs.init({
-        server: "./dist/tpl/"
+        server: "./dist/"
     });
 });
 
 // development task "node fuse""
-Sparky.task("default", ["config", "browserSyncInit", "renderTremplate", 'reload'], () => {
+Sparky.task("default", ["browserSyncInit","config", "renderTremplate", 'reload'], () => {
     vendor.hmr().watch();
     app.watch();
     return fuse.run();
@@ -74,9 +79,8 @@ Sparky.task('reload', () => {
 
 //budowanie szablony HTML
 Sparky.task("renderTremplate", () => {
-    return Sparky.watch("**/*.+(html|twig|json) - assets/components/**", {base: "./src"})
+    return Sparky.watch("**/*.+(html|twig|json)", {base: "./src"})
         .file('*.twig', file => {
-
             //TODO excludować nie potrzebne katalogi
             templateRender.configure('./src/tpl/');
             if(file.name === 'app.twig'){

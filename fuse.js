@@ -7,6 +7,12 @@ const log = console.log;
 const error = chalk.bold.white.bgRed;
 const warning = chalk.bold.white.bgYellow;
 const info = chalk.bold.white.bgBlue;
+var fp = require("find-free-port")
+  var PORT = 3003;// console.log(freePort);
+
+fp(3005, function(err, freePort){
+    PORT = freePort
+});
 
 let fuse, app, vendor, isProduction = false;
 
@@ -28,6 +34,7 @@ Sparky.task("config", () => {
         ]
     });
 
+
     // zaleznosci zewnętrzne
     vendor = fuse.bundle("vendor")
         .instructions("~ index.ts");
@@ -39,14 +46,16 @@ Sparky.task("config", () => {
     bs.init({
         server: "./dist/"
     }, (er,bs) => {
-        if (!isProduction) {
-            fuse.dev({
-                httpServer: false,
-                port: bs.options.get('port')
-            });
-        }
-    });
 
+    });
+    if (!isProduction) {
+        // console.log(bs.options.get('port'));
+        fuse.dev({
+            httpServer: false,
+            port: PORT
+        });
+
+    }
 
 });
 

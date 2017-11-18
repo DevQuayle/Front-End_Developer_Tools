@@ -11,7 +11,6 @@ const info = chalk.bold.white.bgBlue;
 
 var PORT = 3000;
 
-
 function getPort(from, cb) {
     var port = from
     from += 1
@@ -64,14 +63,11 @@ Sparky.task("config", () => {
     bs.init({
         server: "./dist/",
         port: PORT + 1,
-    }, (er, bs) => {
-        // console.log(bs.ui.options.get('port'));
-        getPort(bs.ui.options.get('port'),(port)=>{ console.log('')});
     });
+
     if (!isProduction) {
-        // console.log(bs.options.get('port'));
         fuse.dev({
-            httpServer: false,
+            httpServer: true,
             port: PORT
         });
 
@@ -81,11 +77,17 @@ Sparky.task("config", () => {
 
 
 // development task "node fuse""
-Sparky.task("default", ["config", "renderTremplate"], () => {
+Sparky.task("default", ["config","images", "renderTremplate"], () => {
     vendor.hmr().watch();
     app.watch();
     return fuse.run();
 });
+
+//Obrazki
+Sparky.task('images',()=>{
+    return Sparky.watch('**/*.+(jpg|png|jpeg|gif)',{base:"./src/assets/img"}).dest('./dist/assets/img');
+});
+
 
 // produkcja "node fuse dist"
 Sparky.task("dist", ["set-production", "config"], () => {

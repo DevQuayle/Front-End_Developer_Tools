@@ -1,5 +1,10 @@
- export default class App{
-    public hi(){
-        console.log('test from App clas s');
+import * as $ from "jquery";
+
+export default class App{
+
+    /** Initialize function **/
+    public initialize() : void{
+        const self = this;
+
     }
  }

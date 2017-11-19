@@ -1,21 +1,21 @@
 {
-  "name": "frontend_worklfow",
-  "version": "1.0.0",
-  "description": "Frontend Tools",
+  "name": "frontend_developer_tools",
+  "version": "1.0.1",
+  "description": "Front-End Developer Tools",
   "main": "fuse,js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Sławek Król <DevQuayle>",
+  "author": "Sławek Król (DevQuayle) <krol.slawek1@gmail.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "jquery": "^3.2.1"
+  },
   "devDependencies": {
     "browser-sync": "^2.18.13",
     "chalk": "^2.3.0",
-    "dcs-icon-font": "^3.0.1",
     "fuse-box": "^2.5.0-beta.1",
     "iconfont-maker": "^0.0.7",
-    "node-cmd": "^3.0.0",
     "node-sass": "^4.6.1",
     "nunjucks": "^3.0.1",
     "typescript": "^2.6.1",

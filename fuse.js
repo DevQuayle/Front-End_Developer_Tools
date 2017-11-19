@@ -50,7 +50,13 @@ Sparky.task("config", () => {
             BannerPlugin('// Front-End Workflow Tool Created By Sławek Krol < krol.slawek1@gmail.com > (c) Copyright 2017!'),
             // WebIndexPlugin(),
             isProduction && UglifyJSPlugin(),
-        ]
+        ],
+       /* shim: {
+            jquery: {
+                source: "node_modules/jquery/dist/jquery.js",
+                exports: "$",
+            },
+        }*/
     });
 
 
@@ -66,14 +72,15 @@ Sparky.task("config", () => {
         server: "./dist/",
         port: PORT + 1,
         directory: true,
+        startPath: "/tpl"
     });
+
 
     if (!isProduction) {
         fuse.dev({
             httpServer: true,
             port: PORT
         });
-
     }
 
 });
@@ -99,18 +106,18 @@ Sparky.task('fonts', () => {
                 'src/assets/icons/*.svg',
             ],
             dest: 'dist/assets/fonts/',
-            fontName:"icons",
-            html:true,
-            templateOptions:{
+            fontName: "icons",
+            html: true,
+            templateOptions: {
                 classPrefix: 'icon-',
                 baseSelector: '.icon',
                 baseIconSelector: 'icon'
             },
-            htmlTemplate:"./fuse/iconHtml.hbs",
-            fontHeight:"64",
-            cssDest:"src/assets/scss/components/icons.css",
+            htmlTemplate: "./fuse/iconHtml.hbs",
+            fontHeight: "64",
+            cssDest: "src/assets/scss/components/icons.css",
             cssFontsUrl: "../assets/fonts"
-        }, function(error) {
+        }, function (error) {
             if (error) {
                 log(info("You don't have icons in src/assets/icons"), error);
             } else {
@@ -153,7 +160,6 @@ Sparky.task("renderTremplate", () => {
         .completed(() => {
             Sparky.start('render');
         });
-
 });
 
 

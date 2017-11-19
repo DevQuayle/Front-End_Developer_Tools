@@ -1,22 +1,19 @@
 body{
-    background-color: #c0c0c0;
-    font-family:'Arial';
+    background-color: lightblue;
+    font-family:Arial;
+    img {
+        margin: 0 auto;
+        display: block;
+    }
     h1{
         text-align: center;
-        color: #000000;
     }
-    p{
+    h4{
         text-align: center;
-        font-size:17px;
+        color: gray;
     }
-    i{
-        color: red;
-        font-size:60px;
-        background-color: #fff;
-        border-radius:50%;
-        height: 50px;
-        width: 50px;
-        display: block;
-
+    h5{
+        text-align: center;
+        color: gray;
     }
 }

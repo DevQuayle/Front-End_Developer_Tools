@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>{{fontName}}</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<style>
+		body {
+			font-family: sans-serif;
+			margin: 0;
+			padding: 10px 20px;
+      font-size: 16px;
+		}
+
+    div.table {
+      display: table;
+      width: 100%;
+      margin-bottom: 0px;
+    }
+
+    div.table .cell {
+      display: table-cell;;
+      vertical-align: middle;
+    }
+
+    ul, ul li {
+      padding: 5px;
+      margin: 0px;
+    }
+
+    ul li {
+      list-style: none;
+    }
+
+    .icon-preview-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .icon-wrapper {
+      text-align: center;
+    }
+
+    .{{baseIconSelector}} {
+    	font-size: 45px;
+    }
+
+
+
+	
+
+		{{{styles}}}
+
+		@font-face {
+		font-family: "icons";
+		src: url("icons.eot?df5fab3313a2e14ca25fa42cc653e5f8?#iefix") format("embedded-opentype"),
+		url("icons.woff2?df5fab3313a2e14ca25fa42cc653e5f8") format("woff2"),
+		url("icons.woff?df5fab3313a2e14ca25fa42cc653e5f8") format("woff");
+	}
+	</style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <div class="table">
+              <div class="cell">{{ fontName }}</div>
+              <div class="cell">
+                <input type="text" class="form-control" id="search-box" placeholder="Search icon">
+              </div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <label>
+              {{#with names.[0]}}
+                <i class="{{../baseIconSelector}} {{../classPrefix}}{{ this }} "  ></i> CSS Control
+              {{/with}}
+            </label>
+            <p>Easily style icon color, size, shadow, and anything that's possible with CSS.</p>
+            <br>
+            <div class="row">
+              {{#each names}}
+              <div class="col-xs-12 col-sm-4 col-md-3 icon-preview-wrapper">
+                <div class="table " >
+                  <div class="cell" style="width: 80px;">
+                    <i data-selector="{{../baseIconSelector}} {{../classPrefix}}{{this}}" class="{{../baseIconSelector}} {{../classPrefix}}{{this}} clicked"></i>
+                  </div>
+                  <div class="cell">
+                    <code>{{this}}</code> <br>
+                  </div>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-info">
+          <div class="panel-heading"><b>Usage</b> &nbsp; &nbsp;<small>Clik on icon anh check usage</small></div>
+          <div class="panel-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-xs-12">
+                  <div class="usingHtml"> HTML use:<code></code></div>
+                  <div class="usingCss">CSS pseudo element use: <code></code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row text-center">
+    	Created by Sławek Król < DevQuayle : krol.salwek1@gmail.com >
+    </div>
+ 
+    
+  <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    $(function(){
+      $('#search-box').on('keyup', function(){
+        $('.icon-preview-wrapper').show();
+
+        if ($(this).val().length) {
+          var reg = new RegExp('w*' + $(this).val() + 'w*', '\i');
+          $('.{{ baseIconSelector }}')
+            .filter(function() {
+              if (!this.classList.value.match(reg)) {
+                $(this).closest('.icon-preview-wrapper').hide();
+              }
+            });
+        };
+      });
+
+      function getEntityFromCharacter(character) {
+  var hexCode = character.replace(/['"]/g, '').charCodeAt(0).toString(16).toUpperCase();
+  while (hexCode.length < 4) {
+    hexCode = '0' + hexCode;
+  }
+
+  return '\\' + hexCode + '';
+}
+
+
+      $('.clicked').on('click',function(e){
+      	$('.usingHtml code').text('<i class="'+$(this).attr('data-selector')+'" ></i>')
+      	 var code = window.getComputedStyle(this,':before').content;
+      	 code = getEntityFromCharacter(code);
+      	$('.usingCss code').html('<br>{<br>content: "'+code+ '"; <br> font-family: icons;<br>}');
+      });
+    });
+  </script>
+</body>
+</html>

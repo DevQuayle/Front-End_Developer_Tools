@@ -1,10 +1,11 @@
-const {FuseBox, CSSPlugin, SassPlugin, BannerPlugin, UglifyJSPlugin, Sparky} = require("fuse-box");
+const {FuseBox, CSSPlugin, SassPlugin, BannerPlugin,WebIndexPlugin, UglifyJSPlugin, Sparky} = require("fuse-box");
 const templateRender = require('nunjucks');
 const bs = require("browser-sync");
 const chalk = require('chalk');
 const log = console.log;
 var net = require('net');
 const iconfontMaker = require('iconfont-maker');
+
 
 const err = chalk.bold.white.bgRed;
 const warning = chalk.bold.yellow;
@@ -40,15 +41,19 @@ Sparky.task("config", () => {
         cache: true,
         homeDir: "src",
         output: "dist/$name.js",
-        hash: isProduction,
+        hash: true,//isProduction,
         sourceMaps: !isProduction,
         log: !isProduction,
         // debug: !isProduction,
         plugins: [
             [SassPlugin(), CSSPlugin()],
             CSSPlugin(),
-            BannerPlugin('// Front-End Workflow Tool Created By Sławek Krol < krol.slawek1@gmail.com > (c) Copyright 2017!'),
-            // WebIndexPlugin(),
+            BannerPlugin('// Front-End Developer Tool Created By Sławek Krol < krol.slawek1@gmail.com > (c) Copyright 2017!'),
+            WebIndexPlugin({
+                templateString: `$bundles`,
+                target:"../src/tpl/components/tail.twig"
+
+            }),
             isProduction && UglifyJSPlugin(),
         ],
        /* shim: {

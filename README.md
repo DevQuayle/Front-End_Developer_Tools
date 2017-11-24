@@ -2,3 +2,9 @@
 
 # Front-End Developer Tool [FTD]
 ### Tools based on fuse-box
+
+If can use this package <br>
+clone repo <br>
+``` yarn ``` <br>
+``` node fuse ``` to dev mode <br>
+production mode is in preparation

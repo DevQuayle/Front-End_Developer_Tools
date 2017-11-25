@@ -1,36 +1,18 @@
-const {FuseBox, CSSPlugin, SassPlugin, BannerPlugin,WebIndexPlugin, UglifyJSPlugin, Sparky} = require("fuse-box");
-const templateRender = require('nunjucks');
+const {FuseBox, CSSPlugin, SassPlugin, BannerPlugin, WebIndexPlugin, UglifyJSPlugin, Sparky, QuantumPlugin} = require("fuse-box");
 const bs = require("browser-sync");
-const chalk = require('chalk');
-const log = console.log;
-var net = require('net');
-const iconfontMaker = require('iconfont-maker');
+const Helpers = require('./fuse/helpers');
+const CONFIG = require('./fuse/config');
 
+var PORT = CONFIG.startPort;
 
-const err = chalk.bold.white.bgRed;
-const warning = chalk.bold.yellow;
-const info = chalk.bold.white.bgBlue;
-const success = chalk.bold.white.bgGreen;
+//tasks
+const RenderHtmlSpark = require('./fuse/sparks/renderHtml');
+const ImagesSpark = require('./fuse/sparks/images');
+const IconsSpark = require('./fuse/sparks/icons');
+const DoneSpark = require('./fuse/sparks/done');
+const ClearSpark = require('./fuse/sparks/clear');
 
-var PORT = 3000;
-
-function getPort(from, cb) {
-    var port = from
-    from += 1
-
-    var server = net.createServer()
-    server.listen(port, function (err) {
-        server.once('close', function () {
-            cb(port)
-        })
-        server.close()
-    })
-    server.on('error', function (err) {
-        getPort(from, cb)
-    })
-}
-
-getPort(3000, (port) => {
+Helpers.getPort(CONFIG.startPort, (port) => {
     PORT = port;
 });
 
@@ -38,48 +20,50 @@ let fuse, app, vendor, isProduction = false;
 
 Sparky.task("config", () => {
     fuse = FuseBox.init({
-        cache: true,
-        homeDir: "src",
-        output: "dist/$name.js",
-        hash: true,//isProduction,
+        hmr: true,
+        cache: CONFIG.cache,
+        homeDir: CONFIG.root.src,
+        output: CONFIG.root.dest + "/$name.js",
+        hash: isProduction,
         sourceMaps: !isProduction,
-        log: !isProduction,
-        // debug: !isProduction,
+        log: !isProduction && CONFIG.log,
+        debug: !isProduction && CONFIG.debug,
         plugins: [
             [SassPlugin(), CSSPlugin()],
             CSSPlugin(),
             BannerPlugin('// Front-End Developer Tool Created By Sławek Krol < krol.slawek1@gmail.com > (c) Copyright 2017!'),
             WebIndexPlugin({
                 templateString: `$bundles`,
-                target:"../src/tpl/components/tail.twig"
-
+                target: CONFIG.root.targetTail
             }),
             isProduction && UglifyJSPlugin(),
+            isProduction && QuantumPlugin({
+                polyfills: ["Promise"],
+                manifest: true
+            }),
         ],
-       /* shim: {
-            jquery: {
-                source: "node_modules/jquery/dist/jquery.js",
-                exports: "$",
-            },
-        }*/
+        /* shim: {
+             jquery: {
+                 source: "node_modules/jquery/dist/jquery.js",
+                 exports: "$",
+             },
+         }*/
     });
 
+    /* vendor = fuse.bundle("vendor").instructions("~ index.ts"); */
 
-    // zaleznosci zewnętrzne
-    vendor = fuse.bundle("vendor")
-        .instructions("~ index.ts");
-
-    // moje zaleznosci
     app = fuse.bundle("app")
-        .instructions(`!> [index.ts]`);
+        .instructions(`> index.ts`);
+    // .instructions(`!> [index.ts]`);
 
-    bs.init({
-        server: "./dist/",
-        port: PORT + 1,
-        directory: true,
-        startPath: "/tpl"
-    });
-
+    if (!isProduction) {
+        bs.init({
+            port: PORT + 1,
+            directory: true,
+            server: CONFIG.browserSync.server,
+            startPath: CONFIG.browserSync.srartPath,
+        });
+    }
 
     if (!isProduction) {
         fuse.dev({
@@ -91,82 +75,33 @@ Sparky.task("config", () => {
 });
 
 
-// development task "node fuse""
-Sparky.task("default", ["config", "fonts", "images", "renderTremplate"], () => {
-    vendor.hmr().watch();
-    app.watch();
+// TASKS
+new RenderHtmlSpark();
+new ImagesSpark();
+new IconsSpark();
+new DoneSpark();
+new ClearSpark();
+
+
+// development mode
+Sparky.task("default", ["clear", "config", "fonts", "images", "renderTemplate"], () => {
+    // vendor.hmr().watch();
+    app.hmr().watch();
     return fuse.run();
 });
 
-//Obrazki
-Sparky.task('images', () => {
-    return Sparky.watch('**/*.+(jpg|png|jpeg|gif)', {base: "./src/assets/img"}).clean('./dist/assets/img').dest('./dist/assets/img');
-});
 
-//Ikony
-Sparky.task('fonts', () => {
-    return Sparky.watch('*.+(svg)', {base: "./src/assets/icons"}).clean('./dist/assets/fonts').completed(() => {
-        iconfontMaker({
-            files: [
-                'src/assets/icons/*.svg',
-            ],
-            dest: 'dist/assets/fonts/',
-            fontName: "icons",
-            html: true,
-            templateOptions: {
-                classPrefix: 'icon-',
-                baseSelector: '.icon',
-                baseIconSelector: 'icon'
-            },
-            htmlTemplate: "./fuse/iconHtml.hbs",
-            fontHeight: "64",
-            cssDest: "src/assets/scss/components/icons.css",
-            cssFontsUrl: "../assets/fonts"
-        }, function (error) {
-            if (error) {
-                log(info("You don't have icons in src/assets/icons"), error);
-            } else {
-                log(success('               Generate icon successful!                '));
-            }
-        })
+// production mode
+Sparky.task("dist", ["clear", "set-production", "config", "fonts", "images"], () => {
+    return fuse.run().then(() => {
+        Sparky.start('exit');
     });
 });
-// produkcja "node fuse dist"
-Sparky.task("dist", ["set-production", "config"], () => {
-    return fuse.run();
-});
 
-//ustawia producje
+
 Sparky.task("set-production", () => {
     isProduction = true;
-    return Sparky.src("dist/").clean("dist/");
 });
 
 
-Sparky.task('render', () => {
-    return Sparky.src("**/*.+(html|twig|json)", {base: './src'})
-        .file('*.*', file => {
-            templateRender.configure('./src/');
-            templateRender.render(file.homePath, (err, res) => {
-                if (err) log(error(err));
-                if (res) file.setContent(res);
-            });
-            file.extension = 'html';
-        })
-        .dest("./dist")
-        .completed(() => {
-            bs.reload();
-        });
-});
 
-//budowanie szablony HTML
-Sparky.task("renderTremplate", () => {
-    return Sparky.watch("**/*.+(html|twig|json)", {base: "./src"})
-        .completed(() => {
-            Sparky.start('render');
-        });
-});
-
-
-//TODO
-// -dorobic global config
